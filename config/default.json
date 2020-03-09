@@ -489,6 +489,9 @@
   "hotjar": {
     "id": false
   },
+  "freshrelevance": {
+    "id": "t8fjwpkk"
+  },
   "cms": {
     "endpoint": "/api/ext/cms-data/cms{{type}}/{{cmsId}}",
     "endpointIdentifier": "/api/ext/cms-data/cms{{type}}Identifier/{{cmsIdentifier}}/storeId/{{storeId}}"
