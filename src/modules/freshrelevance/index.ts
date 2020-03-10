@@ -1,5 +1,8 @@
-import { StorefrontModule } from '@vue-storefront/core/lib/modules';
-import { isServer } from '@vue-storefront/core/helpers'
+import {StorefrontModule} from '@vue-storefront/core/lib/modules';
+import {isServer} from '@vue-storefront/core/helpers'
+import {currentStoreView} from '@vue-storefront/core/lib/multistore'
+import {cartHooks} from '@vue-storefront/core/modules/cart/hooks';
+import {catalogHooks} from '@vue-storefront/core/modules/catalog-next/hooks';
 
 const freshrelevanceStore = {
   namespaced: true,
@@ -24,9 +27,25 @@ const freshrelevanceSnippet = (frid) => (function (h, o, t, j, a, r) {
 
 export const FreshrelevanceModule: StorefrontModule = function ({store, appConfig}) {
   store.registerModule('freshrelevance', freshrelevanceStore)
+
   console.log(isServer);
   console.dir(appConfig.freshrelevance);
   if (!isServer && appConfig.freshrelevance && appConfig.freshrelevance.id) {
     freshrelevanceSnippet(appConfig.freshrelevance.id);
+
+    const storeView = currentStoreView();
+    const currencyCode = storeView.i18n.currencyCode;
+
+    cartHooks.afterAddToCart(() => {
+      debugger;
+    });
+
+    catalogHooks.categoryPageVisited((category) => {
+      debugger;
+    });
+
+    catalogHooks.productPageVisited((category) => {
+      debugger;
+    })
   }
-}
+};
