@@ -15,6 +15,6 @@ export const FreshrelevanceModule: StorefrontModule = function ({
     loadScript(appConfig.freshrelevance.id)
       .then(() => attachHooks(store))
       .then(() => initialCapture(store))
-      .catch((e) => Logger.warn(e.message, 'FR')());
+      .catch((e) => Logger.error(e.message, 'FR')());
   }
 };

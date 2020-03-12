@@ -1,45 +1,43 @@
+import { Logger } from '@vue-storefront/core/lib/logger';
+import { Store } from './types';
+
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import { coreHooks } from '@vue-storefront/core/hooks';
 import { cartHooks } from '@vue-storefront/core/modules/cart/hooks';
 import { catalogHooks } from '@vue-storefront/core/modules/catalog-next/hooks';
-import { Logger } from '@vue-storefront/core/lib/logger';
+import { buildProductImageUrls, $TB, data } from './helpers';
 
-const $TB = () => (window as any).$TB;
+function afterAppInit () {
+  const storeView = currentStoreView();
+  $TB().hooks.initializeStore(storeView);
+}
 
-export function attachHooks (store) {
-  // coreHooks.afterProductThumbnailPathGenerate((p) => {
-  //   // after the app has initialised
-  //   console.log('app init', ...args);
-  // });
+function afterAddToCart (store: Store) {}
 
-  cartHooks.afterAddToCart((products) => afterAddToCart(store, products));
+function categoryPageVisited (store: Store) {
+  const products = data.categoryProducts(store).map(buildProductImageUrls);
+  $TB().hooks.onProductList(products);
+}
 
-  catalogHooks.categoryPageVisited((category) =>
-    categoryPageVisited(store, category)
-  );
+function productPageVisited (store: Store) {
+  const product = buildProductImageUrls(data.currentProduct(store));
+  $TB().hooks.onProductBrowse(product);
+}
 
-  catalogHooks.productPageVisited((product) =>
-    productPageVisited(store, product)
-  );
+export function attachHooks (store: Store) {
+  cartHooks.afterAddToCart(() => afterAddToCart(store));
+  catalogHooks.categoryPageVisited(() => categoryPageVisited(store));
+  catalogHooks.productPageVisited(() => productPageVisited(store));
 
   Logger.debug('Hooks attached', 'FR')();
 }
 
-export function initialCapture (store) {
-  // 1) determine what kind of page we're on using store state
-  // 2) call the relevant hook below with the correct data
-  const storeView = currentStoreView();
-  const currencyCode = storeView.i18n.currencyCode;
-}
+export function initialCapture (store: Store) {
+  afterAppInit();
 
-function afterAddToCart (store, products) {}
-
-function categoryPageVisited (store, category) {
-  // called after a product list page has been navigated to
-  $TB().hooks.onProductList(category);
-}
-
-function productPageVisited (store, product) {
-  // called after a product page has been navigated to
-  $TB().hooks.onProductBrowse(product);
+  if (data.categoryProducts(store).length) {
+    categoryPageVisited(store);
+  } else if (data.currentProduct(store)) {
+    productPageVisited(store);
+  }
 }
