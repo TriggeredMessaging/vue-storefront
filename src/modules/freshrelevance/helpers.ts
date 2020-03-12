@@ -11,7 +11,11 @@ export const data = {
   categoryProducts: (store: Store) =>
     store.getters['category-next/getCategoryProducts'],
   currentProduct: (store: Store) =>
-    store.getters['product/getCurrentProduct']
+    store.getters['product/getCurrentProduct'],
+  cart: (store) => ({
+    items: store.getters['cart/getCartItems'],
+    totals: store.getters['cart/getTotals']
+  })
 };
 
 export function getImageForProduct (product: CartItem) {

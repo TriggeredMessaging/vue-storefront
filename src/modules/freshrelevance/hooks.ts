@@ -12,7 +12,17 @@ function afterAppInit () {
   $TB().hooks.initializeStore(storeView);
 }
 
-function afterAddToCart (store: Store) {}
+function afterAddToCart (store: Store) {
+  const cart = data.cart(store);
+  cart.items = cart.items.map((item) => buildProductImageUrls(item));
+  $TB().hooks.onCart(cart);
+}
+
+function afterRemoveFromCart (store: Store) {
+  const cart = data.cart(store);
+  cart.items = cart.items.map((item) => buildProductImageUrls(item));
+  $TB().hooks.onCart(cart);
+}
 
 function categoryPageVisited (store: Store) {
   const products = data.categoryProducts(store).map(buildProductImageUrls);
@@ -25,7 +35,10 @@ function productPageVisited (store: Store) {
 }
 
 export function attachHooks (store: Store) {
+  console.log(store.getters);
+
   cartHooks.afterAddToCart(() => afterAddToCart(store));
+  cartHooks.afterRemoveFromCart(() => afterRemoveFromCart(store));
   catalogHooks.categoryPageVisited(() => categoryPageVisited(store));
   catalogHooks.productPageVisited(() => productPageVisited(store));
 
