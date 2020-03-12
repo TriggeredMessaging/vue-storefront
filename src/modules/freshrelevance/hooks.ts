@@ -7,20 +7,26 @@ import { cartHooks } from '@vue-storefront/core/modules/cart/hooks';
 import { catalogHooks } from '@vue-storefront/core/modules/catalog-next/hooks';
 import { buildProductImageUrls, $TB, data } from './helpers';
 
-function afterAppInit () {
+function afterUserAuthorise (store: Store) {
+  const user = data.user(store);
+  $TB().hooks.onUserUpdate(user);
+}
+
+function afterAppInit (store: Store) {
   const storeView = currentStoreView();
   $TB().hooks.initializeStore(storeView);
+  afterUserAuthorise(store);
 }
 
 function afterAddToCart (store: Store) {
   const cart = data.cart(store);
-  cart.items = cart.items.map((item) => buildProductImageUrls(item));
+  cart.items = cart.items.map(buildProductImageUrls);
   $TB().hooks.onCart(cart);
 }
 
 function afterRemoveFromCart (store: Store) {
   const cart = data.cart(store);
-  cart.items = cart.items.map((item) => buildProductImageUrls(item));
+  cart.items = cart.items.map(buildProductImageUrls);
   $TB().hooks.onCart(cart);
 }
 
@@ -35,8 +41,6 @@ function productPageVisited (store: Store) {
 }
 
 export function attachHooks (store: Store) {
-  console.log(store.getters);
-
   cartHooks.afterAddToCart(() => afterAddToCart(store));
   cartHooks.afterRemoveFromCart(() => afterRemoveFromCart(store));
   catalogHooks.categoryPageVisited(() => categoryPageVisited(store));
@@ -46,7 +50,7 @@ export function attachHooks (store: Store) {
 }
 
 export function initialCapture (store: Store) {
-  afterAppInit();
+  afterAppInit(store);
 
   if (data.categoryProducts(store).length) {
     categoryPageVisited(store);

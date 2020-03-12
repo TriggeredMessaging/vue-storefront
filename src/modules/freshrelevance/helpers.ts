@@ -12,9 +12,13 @@ export const data = {
     store.getters['category-next/getCategoryProducts'],
   currentProduct: (store: Store) =>
     store.getters['product/getCurrentProduct'],
-  cart: (store) => ({
+  cart: (store: Store) => ({
     items: store.getters['cart/getCartItems'],
-    totals: store.getters['cart/getTotals']
+    totals: store.getters['cart/getTotals'],
+    coupon: store.getters['cart/getCoupon']
+  }),
+  user: (store: Store) => ({
+    email: store.getters['user/getUserEmail']
   })
 };
 
