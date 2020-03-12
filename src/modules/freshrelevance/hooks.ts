@@ -42,6 +42,10 @@ function productPageVisited (store: Store) {
   $TB().hooks.onProductBrowse(product);
 }
 
+function afterPurchaseComplete (store: Store) {
+  $TB().hooks.onPurchaseComplete();
+}
+
 export function attachHooks (store: Store) {
   cartHooks.afterAddToCart(() => afterAddToCart(store));
   cartHooks.afterRemoveFromCart(() => afterRemoveFromCart(store));
@@ -52,6 +56,10 @@ export function attachHooks (store: Store) {
     // Opening the cart sidebar
     if (type === 'ui/setMicrocart' && payload === true) {
       onCart(store);
+    }
+
+    if (type === 'checkout/SET_THANKYOU' && payload === true) {
+      afterPurchaseComplete(store);
     }
   });
 
