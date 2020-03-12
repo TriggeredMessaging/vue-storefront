@@ -18,16 +18,18 @@ function afterAppInit (store: Store) {
   afterUserAuthorise(store);
 }
 
-function afterAddToCart (store: Store) {
+function onCart (store: Store) {
   const cart = data.cart(store);
   cart.items = cart.items.map(buildProductImageUrls);
   $TB().hooks.onCart(cart);
 }
 
+function afterAddToCart (store: Store) {
+  onCart(store);
+}
+
 function afterRemoveFromCart (store: Store) {
-  const cart = data.cart(store);
-  cart.items = cart.items.map(buildProductImageUrls);
-  $TB().hooks.onCart(cart);
+  onCart(store);
 }
 
 function categoryPageVisited (store: Store) {
@@ -46,11 +48,20 @@ export function attachHooks (store: Store) {
   catalogHooks.categoryPageVisited(() => categoryPageVisited(store));
   catalogHooks.productPageVisited(() => productPageVisited(store));
 
+  store.subscribe(({ type, payload }) => {
+    // Opening the cart sidebar
+    if (type === 'ui/setMicrocart' && payload === true) {
+      onCart(store);
+    }
+  });
+
   Logger.debug('Hooks attached', 'FR')();
 }
 
 export function initialCapture (store: Store) {
   afterAppInit(store);
+
+  console.log(store.getters);
 
   if (data.categoryProducts(store).length) {
     categoryPageVisited(store);

@@ -14,7 +14,10 @@ export const data = {
     store.getters['product/getCurrentProduct'],
   cart: (store: Store) => ({
     items: store.getters['cart/getCartItems'],
-    totals: store.getters['cart/getTotals'],
+    totals: store.getters['cart/getTotals'].reduce(
+      (totals, { code, value }) => ({ ...totals, [code]: value }),
+      {}
+    ),
     coupon: store.getters['cart/getCoupon']
   }),
   user: (store: Store) => ({
