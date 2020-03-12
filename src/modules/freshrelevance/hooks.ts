@@ -18,18 +18,22 @@ function afterAppInit (store: Store) {
   afterUserAuthorise(store);
 }
 
-function onCart (store: Store) {
+function afterCartVisited (store: Store) {
   const cart = data.cart(store);
   cart.items = cart.items.map(buildProductImageUrls);
-  $TB().hooks.onCart(cart);
+  $TB().hooks.onCartVisit(cart);
 }
 
 function afterAddToCart (store: Store) {
-  onCart(store);
+  afterCartVisited(store);
 }
 
 function afterRemoveFromCart (store: Store) {
-  onCart(store);
+  afterCartVisited(store);
+}
+
+function afterCheckoutVisited (store: Store) {
+  $TB().hooks.onCheckoutVisit();
 }
 
 function categoryPageVisited (store: Store) {
@@ -55,7 +59,11 @@ export function attachHooks (store: Store) {
   store.subscribe(({ type, payload }) => {
     // Opening the cart sidebar
     if (type === 'ui/setMicrocart' && payload === true) {
-      onCart(store);
+      afterCartVisited(store);
+    }
+
+    if (type === 'route/ROUTE_CHANGED' && payload.to.name === 'checkout') {
+      afterCheckoutVisited(store);
     }
 
     if (type === 'checkout/SET_THANKYOU' && payload === true) {
