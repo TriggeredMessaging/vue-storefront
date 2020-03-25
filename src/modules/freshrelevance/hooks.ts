@@ -5,7 +5,13 @@ import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 import { coreHooks } from '@vue-storefront/core/hooks';
 import { cartHooks } from '@vue-storefront/core/modules/cart/hooks';
 import { catalogHooks } from '@vue-storefront/core/modules/catalog-next/hooks';
-import { buildProductImageUrls, $TB, data } from './helpers';
+import {
+  buildProductImageUrls,
+  $TB,
+  data,
+  getCategories,
+  getProductOptions
+} from './helpers';
 
 function afterUserAuthorise (store: Store) {
   const user = data.user(store);
@@ -21,7 +27,9 @@ function afterAppInit (store: Store) {
 function afterCartVisited (store: Store) {
   const cart = data.cart(store);
   cart.items = cart.items.map(buildProductImageUrls);
-  $TB().hooks.onCartVisit(cart);
+  const options = getProductOptions(store);
+  const categories = getCategories(store);
+  $TB().hooks.onCartVisit(cart, options, categories);
 }
 
 function afterAddToCart (store: Store) {
@@ -38,16 +46,29 @@ function afterCheckoutVisited (store: Store) {
 
 function categoryPageVisited (store: Store) {
   const products = data.categoryProducts(store).map(buildProductImageUrls);
-  $TB().hooks.onProductList(products);
+  const options = getProductOptions(store);
+  const categories = getCategories(store);
+  $TB().hooks.onProductList(products, options, categories);
 }
 
 function productPageVisited (store: Store) {
   const product = buildProductImageUrls(data.currentProduct(store));
-  $TB().hooks.onProductBrowse(product);
+  const options = getProductOptions(store);
+  const categories = getCategories(store);
+
+  $TB().hooks.onProductBrowse(product, options, categories);
+}
+
+function productVariantSelected (store: Store) {
+  productPageVisited(store);
 }
 
 function afterPurchaseComplete (store: Store) {
   $TB().hooks.onPurchaseComplete();
+}
+
+function otherPageVisited () {
+  $TB().hooks.onOtherPageVisit();
 }
 
 export function attachHooks (store: Store) {
@@ -62,12 +83,20 @@ export function attachHooks (store: Store) {
       afterCartVisited(store);
     }
 
-    if (type === 'route/ROUTE_CHANGED' && payload.to.name === 'checkout') {
-      afterCheckoutVisited(store);
+    if (type === 'route/ROUTE_CHANGED') {
+      if (payload.to.name === 'checkout') {
+        afterCheckoutVisited(store);
+      } else if (payload.to.name === 'home') {
+        otherPageVisited();
+      }
     }
 
     if (type === 'checkout/SET_THANKYOU' && payload === true) {
       afterPurchaseComplete(store);
+    }
+
+    if (type === 'product/product/SET_CURRENT') {
+      productVariantSelected(store);
     }
   });
 
@@ -77,11 +106,11 @@ export function attachHooks (store: Store) {
 export function initialCapture (store: Store) {
   afterAppInit(store);
 
-  console.log(store.getters);
-
   if (data.categoryProducts(store).length) {
     categoryPageVisited(store);
   } else if (data.currentProduct(store)) {
     productPageVisited(store);
+  } else {
+    otherPageVisited();
   }
 }

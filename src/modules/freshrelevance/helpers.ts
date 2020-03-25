@@ -10,8 +10,11 @@ export const $TB = () => (window as any).$TB;
 export const data = {
   categoryProducts: (store: Store) =>
     store.getters['category-next/getCategoryProducts'],
+  categories: (store: Store) => store.getters['category/getCategories'],
   currentProduct: (store: Store) =>
     store.getters['product/getCurrentProduct'],
+  currentProductOptions: (store: Store) =>
+    store.getters['product/getCurrentProductOptions'],
   cart: (store: Store) => ({
     items: store.getters['cart/getCartItems'],
     totals: store.getters['cart/getTotals'].reduce(
@@ -46,4 +49,18 @@ export function buildProductImageUrls (product: CartItem) {
   }
 
   return { ...product, image, thumbnail, configurable_children };
+}
+
+export function getProductOptions (store: Store) {
+  Object.values(data.currentProductOptions(store)).reduce(
+    (allValues: any[], values) => allValues.concat(values),
+    []
+  );
+}
+
+export function getCategories (store: Store) {
+  return data.categories(store).reduce((categories, category) => {
+    categories[category.id.toString()] = category.name;
+    return categories;
+  }, {});
 }
