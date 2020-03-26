@@ -10,8 +10,10 @@ import {
   $TB,
   data,
   getCategories,
-  getProductOptions
+  getProductOptions,
+  addProductCategories
 } from './helpers';
+import { Category } from '@vue-storefront/core/modules/catalog-next/types/Category';
 
 function afterUserAuthorise (store: Store) {
   const user = data.user(store);
@@ -44,8 +46,11 @@ function afterCheckoutVisited (store: Store) {
   $TB().hooks.onCheckoutVisit();
 }
 
-function categoryPageVisited (store: Store) {
-  const products = data.categoryProducts(store).map(buildProductImageUrls);
+function categoryPageVisited (store: Store, category: Category) {
+  const products = data
+    .categoryProducts(store)
+    .map(buildProductImageUrls)
+    .map((product) => addProductCategories(store, product, category));
   const options = getProductOptions(store);
   const categories = getCategories(store);
   $TB().hooks.onProductList(products, options, categories);
@@ -74,7 +79,7 @@ function otherPageVisited () {
 export function attachHooks (store: Store) {
   cartHooks.afterAddToCart(() => afterAddToCart(store));
   cartHooks.afterRemoveFromCart(() => afterRemoveFromCart(store));
-  catalogHooks.categoryPageVisited(() => categoryPageVisited(store));
+  catalogHooks.categoryPageVisited((category) => categoryPageVisited(store, category));
   catalogHooks.productPageVisited(() => productPageVisited(store));
 
   store.subscribe(({ type, payload }) => {
@@ -107,7 +112,7 @@ export function initialCapture (store: Store) {
   afterAppInit(store);
 
   if (data.categoryProducts(store).length) {
-    categoryPageVisited(store);
+    categoryPageVisited(store, data.currentCategory(store));
   } else if (data.currentProduct(store)) {
     productPageVisited(store);
   } else {
