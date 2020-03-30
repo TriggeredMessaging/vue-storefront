@@ -72,36 +72,32 @@ function afterPurchaseComplete (store: Store) {
   $TB().hooks.onPurchaseComplete();
 }
 
-function otherPageVisited () {
-  $TB().hooks.onOtherPageVisit();
+function otherPageVisited (route: any) {
+  $TB().hooks.onOtherPageVisit(route);
 }
 
 export function attachHooks (store: Store) {
   cartHooks.afterAddToCart(() => afterAddToCart(store));
   cartHooks.afterRemoveFromCart(() => afterRemoveFromCart(store));
-  catalogHooks.categoryPageVisited((category) => categoryPageVisited(store, category));
+  catalogHooks.categoryPageVisited((category) =>
+    categoryPageVisited(store, category)
+  );
   catalogHooks.productPageVisited(() => productPageVisited(store));
 
   store.subscribe(({ type, payload }) => {
     // Opening the cart sidebar
     if (type === 'ui/setMicrocart' && payload === true) {
       afterCartVisited(store);
-    }
-
-    if (type === 'route/ROUTE_CHANGED') {
+    } else if (type === 'checkout/SET_THANKYOU' && payload === true) {
+      afterPurchaseComplete(store);
+    } else if (type === 'product/product/SET_CURRENT') {
+      productVariantSelected(store);
+    } else if (type === 'route/ROUTE_CHANGED') {
       if (payload.to.name === 'checkout') {
         afterCheckoutVisited(store);
-      } else if (payload.to.name === 'home') {
-        otherPageVisited();
+      } else {
+        otherPageVisited(payload.to);
       }
-    }
-
-    if (type === 'checkout/SET_THANKYOU' && payload === true) {
-      afterPurchaseComplete(store);
-    }
-
-    if (type === 'product/product/SET_CURRENT') {
-      productVariantSelected(store);
     }
   });
 
@@ -116,6 +112,6 @@ export function initialCapture (store: Store) {
   } else if (data.currentProduct(store)) {
     productPageVisited(store);
   } else {
-    otherPageVisited();
+    otherPageVisited(data.currentRoute(store));
   }
 }

@@ -9,6 +9,7 @@ import { Category } from '@vue-storefront/core/modules/catalog-next/types/Catego
 export const $TB = () => (window as any).$TB;
 
 export const data = {
+  currentRoute: (store: Store) => store.state.route,
   categoryProducts: (store: Store) =>
     store.getters['category-next/getCategoryProducts'],
 
