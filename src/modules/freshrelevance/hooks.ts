@@ -107,8 +107,22 @@ export function attachHooks (store: Store) {
   Logger.debug('Hooks attached', 'FR')();
 }
 
+// function rebuildCart (store: Store) {
+//   const rebuildCode = data.currentRoute(store).query['some query string key']; // check url query string for rebuild code
+//   if (rebuildCode) {
+//     // build new cart and products from query string
+
+//     // using cart module:
+//     // 1) clear current cart - unsure how to do this safely
+//     // 2) add new items to the cart - using @vue-storefront/core/modules/cart/store/actions/itemActions.ts addItems function
+//   }
+// }
+
 export function initialCapture (store: Store) {
   afterAppInit(store);
+
+  // call rebuild cart function here
+  // rebuildCart(store);
 
   if (data.categoryProducts(store).length) {
     categoryPageVisited(store, data.currentCategory(store));
