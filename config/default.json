@@ -490,7 +490,7 @@
     "id": false
   },
   "freshrelevance": {
-    "id": "tmt0wfms"
+    "id": false
   },
   "cms": {
     "endpoint": "/api/ext/cms-data/cms{{type}}/{{cmsId}}",

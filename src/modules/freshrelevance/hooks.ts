@@ -77,6 +77,7 @@ function otherPageVisited (route: any) {
 }
 
 export function attachHooks (store: Store) {
+  // attach handlers to built-in events hooks
   cartHooks.afterAddToCart(() => afterAddToCart(store));
   cartHooks.afterRemoveFromCart(() => afterRemoveFromCart(store));
   catalogHooks.categoryPageVisited((category) =>
@@ -84,9 +85,11 @@ export function attachHooks (store: Store) {
   );
   catalogHooks.productPageVisited(() => productPageVisited(store));
 
+  // attach handlers to specific store actions by inspecting action.type
+  // until built-in event hooks are added
   store.subscribe(({ type, payload }) => {
-    // Opening the cart sidebar
     if (type === 'ui/setMicrocart' && payload === true) {
+      // Opening the cart sidebar
       afterCartVisited(store);
     } else if (type === 'checkout/SET_THANKYOU' && payload === true) {
       afterPurchaseComplete(store);
@@ -104,22 +107,8 @@ export function attachHooks (store: Store) {
   Logger.debug('Hooks attached', 'FR')();
 }
 
-// function rebuildCart (store: Store) {
-//   const rebuildCode = data.currentRoute(store).query['some query string key']; // check url query string for rebuild code
-//   if (rebuildCode) {
-//     // build new cart and products from query string
-
-//     // using cart module:
-//     // 1) clear current cart - unsure how to do this safely
-//     // 2) add new items to the cart - using @vue-storefront/core/modules/cart/store/actions/itemActions.ts addItems function
-//   }
-// }
-
 export function initialCapture (store: Store) {
   afterAppInit(store);
-
-  // call rebuild cart function here
-  // rebuildCart(store);
 
   if (data.categoryProducts(store).length) {
     categoryPageVisited(store, data.currentCategory(store));
